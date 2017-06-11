@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+  <title>Synchronize Apps</title>
+  <meta charset="utf-8">
+  <!-- Mobile support -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Material Design fonts -->
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <!-- Bootstrap -->
+  <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Bootstrap Material Design -->
+  <link href="../node_modules/bootstrap-material-design/dist/css/bootstrap-material-design.css" rel="stylesheet">
+  <link href="../node_modules/bootstrap-material-design/dist/css/ripples.min.css" rel="stylesheet">
+
+  <!-- Dropdown.js -->
+  <link href="//cdn.rawgit.com/FezVrasta/dropdown.js/master/jquery.dropdown.css" rel="stylesheet">
+
+  <!-- Page style -->
+  <link href="../node_modules/bootstrap-material-design/index.css" rel="stylesheet">
+
+  <!-- jQuery -->
+  <script src="//code.jquery.com/jquery-1.10.2.min.js"></script>
+
+  <style type="text/css">
+  #custom-search-input{
+    padding: 3px;
+    border: solid 1px #E4E4E4;
+    border-radius: 6px;
+    background-color: #fff;
+}
+
+#custom-search-input input{
+    border: 0;
+    box-shadow: none;
+}
+
+#custom-search-input button{
+    margin: 2px 0 0 0;
+    background: none;
+    box-shadow: none;
+    border: 0;
+    color: #666666;
+    padding: 0 8px 0 10px;
+    border-left: solid 1px #ccc;
+}
+
+#custom-search-input button:hover{
+    border: 0;
+    box-shadow: none;
+    border-left: solid 1px #ccc;
+}
+
+#custom-search-input .glyphicon-search{
+    font-size: 23px;
+}
+
+body {
+	background: url(../assets/images/1.jpg);
+}
+
+#panel-title {
+	text-align: center;
+}
+    
+  </style>
+
+</head>
+<body>
+<div class="container">  
+  <div class="col-md-12">
+  	<div class="row">
+  		<div class="col-md-3">
+  		</div>
+  		<div class="col-md-6">
+	  		<div class="panel panel-default" style="margin: 50px 0;" id="sync_search">
+		  		<div class="panel-body">
+		  			<!-- <div id="panel-title">
+		  				<h1 :title="title">{{message}}</h1>
+		  				<p>
+		  					Visit: <a v-bind:href="url">{{cleanUrl}}</a>
+		  				</p>
+		  				<input type="text" name="" v-model="url" class="form-control">
+		  				<button @click="humanizeUrl" class="btn btn-primary">Humanize me</button>
+		  				<br>
+		  				<h1>Hello {{fullname}}</h1>
+		  				<p>Fist Name: {{first}}</p>
+		  				<p>Last Name: {{last}}</p>
+		  				<input type="text" name="" class="form-control" placeholder="your full" v-model="fullname">
+		  				<input type="text" name="" class="form-control" placeholder="first name" v-model="first">
+		  				<input type="text" name="" class="form-control" placeholder="last name" v-model="last">
+		  			</div> -->
+		  			<div id="panel-title">
+			    		<h3>CARI PESAWAT</h3>
+			    	</div>
+		    		<div class="form-group label-floating">
+		      			<label for="i5" class="control-label">ID Pesawat</label>
+		      			<input type="text" class="form-control" id="i5" v-model="id_airline">
+		      			<span class="help-block">Masukan <b>id_airline</b></code></span>
+		    		</div>
+		    		<!-- <div class="row" style="margin-right: 0;">
+			      		<button type="button" class="btn btn-raised btn-primary pull-right">Cari </button>
+			    	</div> -->
+			    	<br>
+			    	<div>
+			    		<h3>Hasil Pencarian: </h3>
+			    		<span class="airline-detail">Nama Pesawat: {{name_airline}}</span>
+			    	</div>
+ 				</div>
+			</div>
+  		</div>
+  		<div class="col-md-3">
+  		</div>
+  	</div>
+  </div>
+</div>
+<script src="../node_modules/vue/dist/vue.js"></script>
+<script src="https://unpkg.com/axios@0.12.0/dist/axios.min.js"></script>
+<script src="https://unpkg.com/lodash@4.13.1/lodash.min.js"></script>
+<script>
+	var app = new Vue({
+		el: '#sync_search',
+		data: {
+			id_airline: '',
+			name_airline: ''
+		},
+		watch: {
+			id_airline: function() {
+				this.name_airline = ''
+				if (this.id_airline>0 && this.id_airline<25000) {
+					this.lookupDetailAirplane()
+				}
+			}
+		},
+		methods: {
+			lookupDetailAirplane: _.debounce(function() {
+				var app = this
+				app.name_airline = "Searching..."
+				axios.get('http://10.151.36.32:5000/select_airline/' + app.id_airline)
+					.then(function(response) {
+						console.log(response.data.airline)
+
+						var airline_detail = response.data.airline
+						if (airline_detail.length!=0) {
+							app.name_airline = airline_detail.name + ', ' + airline_detail.country
+						}
+						else {
+							app.name_airline = "not found"
+						}
+					})
+					.catch(function(error) {
+						// console.log(error)
+						app.name_airline = "invalid ID airline"
+					})
+			}, 500)
+		}
+	})
+	// var app = new Vue({
+	// 	el: '#sync_search',
+	// 	data: {
+	// 		message: 'Hello Vue',
+	// 		title: 'You loaded the page on ' + new Date(),
+	// 		url: "",
+	// 		cleanUrl: "",
+	// 		todos: [
+	// 			{text: "Melody", id: 1},
+	// 			{text: "Gracia", id: 2},
+	// 			{text: "Natio", id: 3}
+	// 		],
+	// 		count: 0,
+	// 		first: '',
+	// 		last: ''
+	// 	},
+	// 	computed: {
+	// 		fullname: {
+	// 			get: function() {
+	// 				return this.first + " " + this.last
+	// 			},
+
+	// 			set: function(value) {
+	// 				var name = value.split(' ')
+	// 				this.first = name[0];
+	// 				this.last = name[name.length() - 1]
+	// 			}
+	// 		}
+	// 	},
+	// 	methods: {
+	// 		humanizeUrl: function() {
+	// 			this.cleanUrl = this.url.replace(/^https?:\/\//, '').replace(/\/$/, '')
+	// 		},
+	// 		countUP: function() {
+	// 			this.count += 1
+	// 		},
+	// 		countDown: function() {
+	// 			this.count -= 1
+	// 		}
+	// 	}
+	// })
+</script>
+<!-- Twitter Bootstrap -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+<!-- Material Design for Bootstrap -->
+<script src="../node_modules/bootstrap-material-design/dist/js/material.js"></script>
+<script src="../node_modules/bootstrap-material-design/dist/js/ripples.min.js"></script>
+<script>
+  $.material.init();
+</script>
+
+<!-- Sliders -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/noUiSlider/6.2.0/jquery.nouislider.min.js"></script>
+
+<!-- Dropdown.js -->
+<script src="https://cdn.rawgit.com/FezVrasta/dropdown.js/master/jquery.dropdown.js"></script>
+<script>
+  $("#dropdown-menu select").dropdown();
+</script>
+</body>
+</html>
